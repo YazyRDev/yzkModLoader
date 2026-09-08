@@ -1,0 +1,25 @@
+# Configuracao local do usuario (pode conter senha do servidor em texto plano)
+.yzkmodloader_config.json
+
+# Pastas geradas em tempo de execucao / build
+build/
+dist/
+*.spec
+__pycache__/
+*.pyc
+
+# Ambiente virtual Python
+venv/
+.venv/
+env/
+
+# Icone customizado (cada pessoa que compilar usa o seu proprio)
+icon.ico
+
+# Arquivos de sistema
+.DS_Store
+Thumbs.db
+
+# IDEs
+.vscode/
+.idea/
