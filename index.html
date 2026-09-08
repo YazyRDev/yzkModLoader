@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>yzkModLoader — baixe mods do Modrinth em um clique</title>
+<meta name="description" content="App desktop gratuito e open source para buscar, baixar e compartilhar mods, resource packs e plugins do Modrinth. Suporte a Fabric, Forge, NeoForge e Quilt.">
+<link rel="icon" href="data:,">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d0e10;
+    --panel: #161719;
+    --panel-2: #1d1f22;
+    --border: #2b2d30;
+    --border-soft: #212327;
+    --text: #e8e8e6;
+    --text-dim: #9a9c9f;
+    --text-faint: #6b6d70;
+    --accent: #c3f53c;
+    --accent-dim: #8fb82c;
+    --accent-ink: #10130a;
+    --radius: 14px;
+    --font-display: 'Space Grotesk', sans-serif;
+    --font-body: 'Inter', sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+  }
+
+  * { box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-body);
+    font-size: 16px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  a { color: inherit; }
+
+  .wrap {
+    max-width: 1080px;
+    margin: 0 auto;
+    padding: 0 32px;
+  }
+
+  /* ---------- Nav ---------- */
+
+  nav.top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 28px 32px;
+    max-width: 1080px;
+    margin: 0 auto;
+  }
+
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 18px;
+    text-decoration: none;
+    color: var(--text);
+  }
+
+  .brand-mark {
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    background: var(--accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--accent-ink);
+    font-weight: 700;
+    font-size: 14px;
+    font-family: var(--font-mono);
+    flex-shrink: 0;
+  }
+
+  .nav-links {
+    display: flex;
+    gap: 28px;
+    font-size: 14px;
+    color: var(--text-dim);
+  }
+
+  .nav-links a { text-decoration: none; transition: color .15s ease; }
+  .nav-links a:hover { color: var(--text); }
+
+  @media (max-width: 640px) {
+    .nav-links { display: none; }
+  }
+
+  /* ---------- Hero ---------- */
+
+  header.hero {
+    padding: 64px 0 96px;
+  }
+
+  .hero-grid {
+    display: grid;
+    grid-template-columns: 1.1fr 0.9fr;
+    gap: 56px;
+    align-items: center;
+  }
+
+  @media (max-width: 860px) {
+    .hero-grid { grid-template-columns: 1fr; }
+  }
+
+  .eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--accent);
+    background: rgba(195, 245, 60, 0.08);
+    border: 1px solid rgba(195, 245, 60, 0.25);
+    padding: 5px 12px;
+    border-radius: 999px;
+    margin-bottom: 24px;
+  }
+
+  .eyebrow-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+  }
+
+  h1 {
+    font-family: var(--font-display);
+    font-size: clamp(36px, 5.4vw, 56px);
+    line-height: 1.08;
+    font-weight: 500;
+    margin: 0 0 22px;
+    letter-spacing: -0.01em;
+  }
+
+  h1 span { color: var(--accent); }
+
+  .hero-sub {
+    font-size: 17px;
+    color: var(--text-dim);
+    max-width: 46ch;
+    margin: 0 0 36px;
+  }
+
+  .cta-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    font-family: var(--font-body);
+    font-weight: 600;
+    font-size: 15px;
+    padding: 14px 24px;
+    border-radius: 10px;
+    text-decoration: none;
+    border: 1px solid transparent;
+    transition: transform .15s ease, background .15s ease, border-color .15s ease;
+  }
+
+  .btn:active { transform: scale(0.98); }
+
+  .btn-primary {
+    background: var(--accent);
+    color: var(--accent-ink);
+  }
+
+  .btn-primary:hover { background: #d1ff5c; }
+
+  .btn-ghost {
+    background: transparent;
+    color: var(--text);
+    border-color: var(--border);
+  }
+
+  .btn-ghost:hover { border-color: var(--text-faint); }
+
+  .hero-meta {
+    font-size: 13px;
+    color: var(--text-faint);
+    font-family: var(--font-mono);
+  }
+
+  .hero-meta a { color: var(--text-dim); text-decoration: underline; text-underline-offset: 3px; }
+
+  /* ---------- App preview mock ---------- */
+
+  .mock {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+
+  .mock-bar {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .mock-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--border-soft);
+  }
+
+  .mock-title {
+    margin-left: 8px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--text-faint);
+  }
+
+  .mock-body {
+    display: grid;
+    grid-template-columns: 84px 1fr;
+    min-height: 300px;
+  }
+
+  .mock-side {
+    background: var(--bg);
+    border-right: 1px solid var(--border);
+    padding: 14px 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .mock-side-item {
+    font-size: 10px;
+    text-align: center;
+    color: var(--text-faint);
+    padding: 8px 4px;
+    border-radius: 8px;
+    font-family: var(--font-mono);
+  }
+
+  .mock-side-item.active {
+    background: var(--panel-2);
+    color: var(--accent);
+  }
+
+  .mock-main {
+    padding: 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .mock-search {
+    height: 34px;
+    border-radius: 8px;
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    padding: 0 12px;
+    font-size: 12px;
+    color: var(--text-faint);
+    font-family: var(--font-mono);
+  }
+
+  .mock-row {
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  .mock-row-text .t1 {
+    font-size: 13px;
+    font-weight: 500;
+    margin-bottom: 3px;
+  }
+
+  .mock-row-text .t2 {
+    font-size: 11px;
+    color: var(--text-faint);
+    font-family: var(--font-mono);
+  }
+
+  .mock-pill {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--accent-ink);
+    background: var(--accent);
+    padding: 6px 12px;
+    border-radius: 6px;
+    flex-shrink: 0;
+  }
+
+  /* ---------- Sections ---------- */
+
+  section {
+    padding: 72px 0;
+    border-top: 1px solid var(--border-soft);
+  }
+
+  .section-head {
+    max-width: 56ch;
+    margin-bottom: 48px;
+  }
+
+  .section-label {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--accent);
+    margin-bottom: 12px;
+  }
+
+  h2 {
+    font-family: var(--font-display);
+    font-size: clamp(26px, 3.4vw, 34px);
+    font-weight: 500;
+    margin: 0 0 12px;
+    letter-spacing: -0.01em;
+  }
+
+  .section-sub {
+    color: var(--text-dim);
+    font-size: 15px;
+    margin: 0;
+  }
+
+  /* ---------- Features ---------- */
+
+  .feature-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1px;
+    background: var(--border-soft);
+    border: 1px solid var(--border-soft);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+
+  @media (max-width: 860px) {
+    .feature-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (max-width: 560px) {
+    .feature-grid { grid-template-columns: 1fr; }
+  }
+
+  .feature {
+    background: var(--panel);
+    padding: 28px 24px;
+  }
+
+  .feature-icon {
+    width: 36px;
+    height: 36px;
+    margin-bottom: 18px;
+    color: var(--accent);
+  }
+
+  .feature h3 {
+    font-family: var(--font-body);
+    font-size: 15px;
+    font-weight: 600;
+    margin: 0 0 8px;
+  }
+
+  .feature p {
+    font-size: 13.5px;
+    color: var(--text-dim);
+    margin: 0;
+    line-height: 1.6;
+  }
+
+  .feature code {
+    font-family: var(--font-mono);
+    background: var(--panel-2);
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-size: 12.5px;
+    color: var(--accent);
+  }
+
+  /* ---------- Loaders strip ---------- */
+
+  .loaders {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-top: 40px;
+  }
+
+  .loader-chip {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--text-dim);
+    border: 1px solid var(--border);
+    padding: 8px 16px;
+    border-radius: 8px;
+    background: var(--panel);
+  }
+
+  /* ---------- Install steps ---------- */
+
+  .steps {
+    display: grid;
+    gap: 14px;
+  }
+
+  .step {
+    display: grid;
+    grid-template-columns: 40px 1fr;
+    gap: 18px;
+    align-items: start;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 18px 20px;
+  }
+
+  .step-num {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    color: var(--accent);
+    font-family: var(--font-mono);
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .step h4 {
+    margin: 4px 0 6px;
+    font-size: 14.5px;
+    font-weight: 600;
+  }
+
+  .step p {
+    margin: 0;
+    font-size: 13.5px;
+    color: var(--text-dim);
+  }
+
+  .step code {
+    font-family: var(--font-mono);
+    background: var(--panel-2);
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-size: 12.5px;
+    color: var(--accent);
+  }
+
+  /* ---------- Open source cards ---------- */
+
+  .oss-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+  }
+
+  @media (max-width: 760px) {
+    .oss-grid { grid-template-columns: 1fr; }
+  }
+
+  .oss-card {
+    display: block;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 22px;
+    text-decoration: none;
+    color: var(--text);
+    transition: border-color .15s ease, transform .15s ease;
+  }
+
+  .oss-card:hover {
+    border-color: var(--accent-dim);
+    transform: translateY(-2px);
+  }
+
+  .oss-card-icon {
+    width: 24px;
+    height: 24px;
+    color: var(--accent);
+    margin-bottom: 16px;
+  }
+
+  .oss-card h4 {
+    margin: 0 0 6px;
+    font-size: 15px;
+    font-weight: 600;
+  }
+
+  .oss-card p {
+    margin: 0;
+    font-size: 13px;
+    color: var(--text-dim);
+  }
+
+  /* ---------- Footer ---------- */
+
+  footer {
+    padding: 40px 0 60px;
+    border-top: 1px solid var(--border-soft);
+  }
+
+  .footer-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+
+  .footer-note {
+    font-size: 13px;
+    color: var(--text-faint);
+    max-width: 60ch;
+  }
+
+  .footer-links {
+    display: flex;
+    gap: 20px;
+    font-size: 13px;
+    color: var(--text-dim);
+  }
+
+  .footer-links a { text-decoration: none; }
+  .footer-links a:hover { color: var(--text); }
+</style>
+</head>
+<body>
+
+<nav class="top">
+  <a class="brand" href="#top">
+    <span class="brand-mark">yz</span>
+    yzkModLoader
+  </a>
+  <div class="nav-links">
+    <a href="#features">Recursos</a>
+    <a href="#install">Instalar</a>
+    <a href="#opensource">Código aberto</a>
+  </div>
+</nav>
+
+<div class="wrap" id="top">
+  <header class="hero">
+    <div class="hero-grid">
+      <div>
+        <span class="eyebrow"><span class="eyebrow-dot"></span>Gratuito e open source</span>
+        <h1>Baixe mods do Modrinth <span>sem abrir o navegador</span></h1>
+        <p class="hero-sub">
+          App desktop para Windows que busca, baixa e organiza mods, resource
+          packs e plugins direto do Modrinth. Cria modpacks compartilháveis e
+          envia plugins pro seu servidor Purpur, tudo numa interface dark só sua.
+        </p>
+        <div class="cta-row">
+          <a class="btn btn-primary" href="https://github.com/YazyRDev/yzkModLoader/releases/latest/download/yzkModLoader.exe">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v14"/><path d="M6 11l6 6 6-6"/><path d="M4 21h16"/></svg>
+            Baixar para Windows
+          </a>
+          <a class="btn btn-ghost" href="https://github.com/YazyRDev/yzkModLoader">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+            Ver código no GitHub
+          </a>
+        </div>
+        <p class="hero-meta">Windows 10/11 · sem instalador, é só executar · <a href="#opensource">licença MIT</a></p>
+      </div>
+
+      <div class="mock" aria-hidden="true">
+        <div class="mock-bar">
+          <span class="mock-dot"></span><span class="mock-dot"></span><span class="mock-dot"></span>
+          <span class="mock-title">yzkModLoader</span>
+        </div>
+        <div class="mock-body">
+          <div class="mock-side">
+            <div class="mock-side-item active">Mods</div>
+            <div class="mock-side-item">Resource<br>Packs</div>
+            <div class="mock-side-item">Plugins</div>
+            <div class="mock-side-item">Modpacks</div>
+            <div class="mock-side-item">Meus<br>Modpacks</div>
+          </div>
+          <div class="mock-main">
+            <div class="mock-search">Buscar mods no Modrinth...</div>
+            <div class="mock-row">
+              <div class="mock-row-text">
+                <div class="t1">Sodium</div>
+                <div class="t2">Fabric · 42M downloads</div>
+              </div>
+              <div class="mock-pill">Baixar</div>
+            </div>
+            <div class="mock-row">
+              <div class="mock-row-text">
+                <div class="t1">Lithium</div>
+                <div class="t2">Fabric · 18M downloads</div>
+              </div>
+              <div class="mock-pill">Baixar</div>
+            </div>
+            <div class="mock-row">
+              <div class="mock-row-text">
+                <div class="t1">Iris Shaders</div>
+                <div class="t2">Fabric · 22M downloads</div>
+              </div>
+              <div class="mock-pill">Baixar</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+</div>
+
+<div class="wrap">
+  <section id="features">
+    <div class="section-head">
+      <div class="section-label">Recursos</div>
+      <h2>Tudo que você faria no site do Modrinth, sem sair de uma janela</h2>
+      <p class="section-sub">Busca, baixa, organiza e compartilha — direto na sua máquina.</p>
+    </div>
+
+    <div class="feature-grid">
+      <div class="feature">
+        <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M8 12h8M8 8h8M8 16h5"/></svg>
+        <h3>Busca direto no Modrinth</h3>
+        <p>Mods, resource packs, plugins e modpacks — pesquise por nome e filtre por versão do Minecraft e loader, tudo dentro do app.</p>
+      </div>
+      <div class="feature">
+        <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z"/></svg>
+        <h3>Fabric, Forge, NeoForge e Quilt</h3>
+        <p>Escolha o loader na hora de buscar. O app filtra os resultados e baixa a versão certa automaticamente.</p>
+      </div>
+      <div class="feature">
+        <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 11l3 3 8-8"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+        <h3>Seleção múltipla</h3>
+        <p>Marque vários mods de uma vez e baixe todos juntos, sem precisar clicar item por item.</p>
+      </div>
+      <div class="feature">
+        <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2l9 4.9V17L12 22l-9-5.1V6.9z"/><path d="M12 22V12M3 6.9L12 12l9-5.1"/></svg>
+        <h3>Modpacks próprios <code>.yzk</code></h3>
+        <p>Junte seus mods num arquivo só e mande pra outra pessoa. Ela clica duas vezes e instala tudo automaticamente.</p>
+      </div>
+      <div class="feature">
+        <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+        <h3>Pacotes de resource packs <code>.yzkrp</code></h3>
+        <p>Mesma ideia dos modpacks, só que pra texturas — crie, compartilhe e reinstale com um clique.</p>
+      </div>
+      <div class="feature">
+        <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 17V7a2 2 0 012-2h8l6 6v6a2 2 0 01-2 2H6a2 2 0 01-2-2z"/><path d="M14 5v6h6"/></svg>
+        <h3>Envio direto pro servidor</h3>
+        <p>Plugins podem ir direto pra pasta do seu servidor Purpur hospedado, via SFTP, sem precisar de FTP client separado.</p>
+      </div>
+    </div>
+
+    <div class="loaders">
+      <span class="loader-chip">Fabric</span>
+      <span class="loader-chip">Forge</span>
+      <span class="loader-chip">NeoForge</span>
+      <span class="loader-chip">Quilt</span>
+    </div>
+  </section>
+
+  <section id="install">
+    <div class="section-head">
+      <div class="section-label">Instalação</div>
+      <h2>Rodando em menos de 2 minutos</h2>
+      <p class="section-sub">Baixe o executável e pronto — não precisa instalar Python nem nada além disso.</p>
+    </div>
+
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div>
+          <h4>Baixe o yzkModLoader.exe</h4>
+          <p>Use o botão no topo da página, ou pegue direto na <a href="https://github.com/YazyRDev/yzkModLoader/releases">página de releases</a> do GitHub.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div>
+          <h4>Execute o arquivo</h4>
+          <p>Dê duplo clique no <code>.exe</code>. Se o Windows Defender avisar sobre "editor desconhecido", clique em "Mais informações" → "Executar assim mesmo" — é normal em apps sem certificado pago.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div>
+          <h4>Aceite a permissão de administrador</h4>
+          <p>Na primeira execução, o app pede permissão via UAC para associar os arquivos <code>.yzk</code> e <code>.yzkrp</code> ao Windows. Aceite para poder abrir esses arquivos com duplo clique depois.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">4</div>
+        <div>
+          <h4>Configure suas pastas</h4>
+          <p>Vá no ícone de engrenagem e escolha onde salvar mods e resource packs. Pronto, já pode buscar e baixar.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="opensource">
+    <div class="section-head">
+      <div class="section-label">Código aberto</div>
+      <h2>Todo o código está no GitHub</h2>
+      <p class="section-sub">Sem telemetria, sem conta obrigatória, sem custo. Use, estude ou contribua à vontade.</p>
+    </div>
+
+    <div class="oss-grid">
+      <a class="oss-card" href="https://github.com/YazyRDev/yzkModLoader">
+        <svg class="oss-card-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+        <h4>Repositório</h4>
+        <p>Código-fonte completo, histórico de commits e como rodar localmente.</p>
+      </a>
+      <a class="oss-card" href="https://github.com/YazyRDev/yzkModLoader/releases">
+        <svg class="oss-card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 12v7a2 2 0 01-2 2H6a2 2 0 01-2-2v-7"/><path d="M16 6l-4-4-4 4"/><path d="M12 2v13"/></svg>
+        <h4>Releases</h4>
+        <p>Todas as versões publicadas do executável, com notas de cada atualização.</p>
+      </a>
+      <a class="oss-card" href="https://github.com/YazyRDev/yzkModLoader/blob/main/LICENSE">
+        <svg class="oss-card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/><circle cx="12" cy="12" r="4"/></svg>
+        <h4>Licença MIT</h4>
+        <p>Uso, modificação e redistribuição livres, inclusive para fins comerciais.</p>
+      </a>
+    </div>
+  </section>
+</div>
+
+<footer>
+  <div class="wrap">
+    <div class="footer-row">
+      <p class="footer-note">
+        yzkModLoader não é afiliado ao Modrinth, Mojang, Microsoft ou aos
+        desenvolvedores do Purpur/Paper. Ferramenta independente que consome
+        a API pública do Modrinth.
+      </p>
+      <div class="footer-links">
+        <a href="https://github.com/YazyRDev/yzkModLoader">GitHub</a>
+        <a href="https://github.com/YazyRDev/yzkModLoader/issues">Issues</a>
+        <a href="https://github.com/YazyRDev/yzkModLoader/blob/main/CONTRIBUTING.md">Contribuir</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
